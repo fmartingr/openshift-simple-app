@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def index():
+def root_view():
     """List all available routes"""
     routes = {}
     for rule in app.url_map.iter_rules():
@@ -31,7 +31,7 @@ def index():
 
 
 @app.route("/environment")
-def environment():
+def environment_view():
     """Return defined environment"""
 
     if request.accept_mimetypes.accept_json:
@@ -49,7 +49,7 @@ def environment():
 
 
 @app.route("/headers")
-def headers():
+def headers_view():
     """Return request headers"""
 
     if request.accept_mimetypes.accept_json:
@@ -67,7 +67,7 @@ def headers():
 
 
 @app.route("/log", methods=["POST"])
-def view_log():
+def log_view():
     """
     Logs the provided payload into stdout.
     Accepts JSON and plain text
