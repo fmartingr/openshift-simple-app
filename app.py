@@ -66,5 +66,21 @@ def headers():
     )
 
 
+@app.route("/log", methods=["POST"])
+def view_log():
+    """
+    Logs the provided payload into stdout.
+    Accepts JSON and plain text
+    Returns the provided data on response
+    """
+    if request.is_json:
+        app.logger.warn(request.json)
+        return jsonify(request.json)
+
+    data = request.get_data().decode("utf-8")
+    app.logger.warn(data)
+    return Response(data)
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=8080, host="0.0.0.0")
