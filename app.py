@@ -1,5 +1,6 @@
 import os
 
+import requests
 from flask import Flask, request, Response, render_template, jsonify
 
 app = Flask(__name__)
@@ -80,6 +81,29 @@ def log_view():
     data = request.get_data().decode("utf-8")
     app.logger.warn(data)
     return Response(data)
+
+
+@app.route("/http_request", methods=["POST"])
+def http_request_view():
+    """
+    Performs an http request.
+    The view is just a passthrough to the requests library:
+    - `method` parameter to set the request method
+    - Every other parameter will be sent directly to the requests request method
+    """
+    params = request.json
+    method = params.pop("method", "GET")
+    response = requests.request(method, **params)
+
+    return jsonify({
+        "method": method,
+        "params": params,
+        "response": {
+            "content": response.text,
+            "json": response.json(),
+            "headers": {key: value for key, value in response.headers.items()}
+        }
+    })
 
 
 if __name__ == "__main__":
