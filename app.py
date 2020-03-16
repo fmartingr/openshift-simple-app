@@ -19,13 +19,13 @@ def root_view():
                 filter(None, app.view_functions[rule.endpoint].__doc__.split("\n"))
             )[0].strip()
 
-    # JSON response
-    if request.accept_mimetypes.accept_json:
-        return jsonify(routes)
-
     # HTML response
     if request.accept_mimetypes.accept_html:
         return render_template("index.j2", routes=routes)
+
+    # JSON response
+    if request.accept_mimetypes.accept_json:
+        return jsonify(routes)
 
     # Plain text response
     return Response(
@@ -86,13 +86,15 @@ def log_view():
     Accepts JSON and plain text
     Returns the provided data on response
     """
+    # JSON response
     if request.is_json:
         app.logger.warn(request.json)
         return jsonify(request.json)
 
+    # Plain text response
     data = request.get_data().decode("utf-8")
     app.logger.warn(data)
-    return Response(data)
+    return Response(data, content_type="plain/text")
 
 
 @app.route("/http_request", methods=["POST"])
