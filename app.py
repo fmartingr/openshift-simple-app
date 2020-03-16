@@ -12,7 +12,7 @@ app.url_map.add(Rule("/request", endpoint="request"))
 def root_view():
     """List all available routes"""
     routes = {}
-    for rule in app.url_map.iter_rules():
+    for rule in sorted(app.url_map.iter_rules(), key=lambda rule: rule.rule):
         if rule.endpoint != "static":
             # Get only the first line from the docstring as the summary
             routes[rule.rule] = list(

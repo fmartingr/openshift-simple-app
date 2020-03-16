@@ -4,7 +4,7 @@
 <body>
 <ul>
 {% for path, help in routes.items() %}
-<li><a href="{{ path }}"> {{ help }}</li>
+<li><a href="{{ path }}">{{ path }}</a>: {{ help }}</li>
 {% endfor %}
 </ul>
 </body>
