@@ -2,8 +2,10 @@ import os
 
 import requests
 from flask import Flask, request, Response, render_template, jsonify
+from werkzeug.routing import Rule
 
 app = Flask(__name__)
+app.url_map.add(Rule("/request", endpoint="request"))
 
 
 @app.route("/")
@@ -12,14 +14,20 @@ def root_view():
     routes = {}
     for rule in app.url_map.iter_rules():
         if rule.endpoint != "static":
-            routes[rule.rule] = app.view_functions[rule.endpoint].__doc__
+            # Get only the first line from the docstring as the summary
+            routes[rule.rule] = list(
+                filter(None, app.view_functions[rule.endpoint].__doc__.split("\n"))
+            )[0].strip()
 
+    # JSON response
     if request.accept_mimetypes.accept_json:
         return jsonify(routes)
 
+    # HTML response
     if request.accept_mimetypes.accept_html:
         return render_template("index.j2", routes=routes)
 
+    # Plain text response
     return Response(
         "\n".join(
             [
@@ -35,9 +43,11 @@ def root_view():
 def environment_view():
     """Return defined environment"""
 
+    # JSON response
     if request.accept_mimetypes.accept_json:
         return jsonify(os.environ.copy())
 
+    # Plain text response
     return Response(
         "\n".join(
             [
@@ -53,9 +63,11 @@ def environment_view():
 def headers_view():
     """Return request headers"""
 
+    # JSON response
     if request.accept_mimetypes.accept_json:
         return jsonify(dict(request.headers))
 
+    # Plain text response
     return Response(
         "\n".join(
             [
@@ -95,15 +107,47 @@ def http_request_view():
     method = params.pop("method", "GET")
     response = requests.request(method, **params)
 
-    return jsonify({
-        "method": method,
-        "params": params,
-        "response": {
-            "content": response.text,
-            "json": response.json(),
-            "headers": {key: value for key, value in response.headers.items()}
+    # JSON response
+    return jsonify(
+        {
+            "method": method,
+            "params": params,
+            "response": {
+                "content": response.text,
+                "json": response.json(),
+                "headers": {key: value for key, value in response.headers.items()},
+            },
         }
-    })
+    )
+
+
+@app.endpoint("request")
+def request_view():
+    """
+    Return request information.
+    Useful to use along /request from other pods.
+    """
+
+    request_data = {
+        "method": request.method,
+        "url": request.url,
+        "path": request.path,
+        "data": request.get_data(as_text=True),
+        "json": request.get_json(),
+        "cookies": {key: value for key, value in request.cookies.items()},
+        "params": {key: value for key, value in request.args.items()},
+        "headers": {key: value for key, value in request.headers.items()},
+    }
+
+    # JSON response
+    if request.accept_mimetypes.accept_json:
+        return jsonify(request_data)
+
+    # Plain text response
+    return Response(
+        render_template("request.j2", request_data=request_data),
+        content_type="text/plain",
+    )
 
 
 if __name__ == "__main__":

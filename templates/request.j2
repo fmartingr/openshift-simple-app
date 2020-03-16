@@ -1,0 +1,6 @@
+{{ request_data.method }} {{ request_data.url }}
+{% for key, value in request_data.headers.items() %}
+{{ key }}: {{ value }}{% endfor %}
+{% for key, value in request_data.cookies.items() %}
+{{ key }}: {{ value }}{% endfor %}
+{{ request_data.data }}
