@@ -2,8 +2,10 @@
 <head>
 </head>
 <body>
+<ul>
 {% for path, help in routes.items() %}
-<a href="{{ path }}"> {{ help }}
+<li><a href="{{ path }}"> {{ help }}</li>
 {% endfor %}
+</ul>
 </body>
 </html>
