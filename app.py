@@ -1,4 +1,5 @@
 import os
+import logging
 
 import requests
 from flask import Flask, request, Response, render_template, jsonify
@@ -6,6 +7,10 @@ from werkzeug.routing import Rule
 
 app = Flask(__name__)
 app.url_map.add(Rule("/request", endpoint="request"))
+
+
+logging.basicConfig(format="%(message)s", level="INFO")
+black_logger = logging.getLogger("blank")
 
 
 @app.route("/")
@@ -88,12 +93,12 @@ def log_view():
     """
     # JSON response
     if request.is_json:
-        app.logger.warn(request.json)
+        black_logger.warn(request.json)
         return jsonify(request.json)
 
     # Plain text response
     data = request.get_data().decode("utf-8")
-    app.logger.warn(data)
+    black_logger.warn(data)
     return Response(data, content_type="plain/text")
 
 
@@ -123,7 +128,7 @@ def http_request_view():
     )
 
 
-@app.endpoint("request")
+@app.endpoint("request")  # /request
 def request_view():
     """
     Return request information.
