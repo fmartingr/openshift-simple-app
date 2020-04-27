@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import sys
 
 import requests
 from flask import Flask, request, Response, render_template, jsonify
@@ -94,12 +95,12 @@ def log_view():
     """
     # JSON response
     if request.is_json:
-        black_logger.warn(json.dumps(request.json))
+        sys.stdout.write(json.dumps(request.json) + "\n")
         return jsonify(request.json)
 
     # Plain text response
     data = request.get_data().decode("utf-8")
-    black_logger.warn(data)
+    sys.stdout.write(f"{data}\n")
     return Response(data, content_type="plain/text")
 
 
