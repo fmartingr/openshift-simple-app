@@ -172,8 +172,8 @@ def samesite_view():
             <title>SameSite on {hostname}</title>
         </head>
         <body>
+            Both hostnames shown here should be the same if session stickiness is working properly with haproxy. <br />
             SameSite on {hostname} <br />
-            Both hostnames shown here should be the same if session stickiness is working properly with haproxy. <br />:w
             <iframe src=\"/samesite/iframe\" title=\"samesite test\">
         </body>
     </html>"""
