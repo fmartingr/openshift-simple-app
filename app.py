@@ -159,5 +159,26 @@ def request_view():
     )
 
 
+@app.route("/samesite")
+def samesite_view():
+    hostname = os.environ.get("HOSTNAME")
+    return f"""
+    <html>
+        <head>
+            <title>SameSite on {hostname}</title>
+        </head>
+        <body>
+            SameSite on {hostname} <br />
+            <iframe src=\"/samesite/iframe\" title=\"samesite test\">
+        </body>
+    </html>"""
+
+
+@app.route("/samesite/iframe")
+def samesite_iframe_view():
+    hostname = os.environ.get("HOSTNAME")
+    return f"iframe on {hostname}"
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=8080, host="0.0.0.0")
