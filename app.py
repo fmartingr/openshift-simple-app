@@ -22,9 +22,10 @@ def root_view():
     for rule in sorted(app.url_map.iter_rules(), key=lambda rule: rule.rule):
         if rule.endpoint != "static":
             # Get only the first line from the docstring as the summary
-            routes[rule.rule] = list(
-                filter(None, app.view_functions[rule.endpoint].__doc__.split("\n"))
-            )[0].strip()
+            if app.view_functions[rule.endpoint].__doc__:
+                routes[rule.rule] = list(
+                    filter(None, app.view_functions[rule.endpoint].__doc__.split("\n"))
+                )[0].strip()
 
     # HTML response
     if request.accept_mimetypes.accept_html:
@@ -161,6 +162,9 @@ def request_view():
 
 @app.route("/samesite")
 def samesite_view():
+    """
+    Test the SameSite Haproxy bug (BZ#1879445)
+    """
     hostname = os.environ.get("HOSTNAME")
     return f"""
     <html>
@@ -169,6 +173,7 @@ def samesite_view():
         </head>
         <body>
             SameSite on {hostname} <br />
+            Both hostnames shown here should be the same if session stickiness is working properly with haproxy. <br />:w
             <iframe src=\"/samesite/iframe\" title=\"samesite test\">
         </body>
     </html>"""
