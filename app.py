@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+import subprocess
 
 import requests
 from flask import Flask, request, Response, render_template, jsonify
@@ -158,6 +159,43 @@ def request_view():
         render_template("request.j2", request_data=request_data),
         content_type="text/plain",
     )
+
+
+@app.route("/curl", methods=["POST"])
+def curl_view():
+    """
+    Get connection information from curl to the defined URL in POST
+
+    Usage:
+        curl -X POST http://this-app/curl -d '{"url": "https://fmartingr.com"}' -h "Content-Type: application/json"
+        http http://this-app/curl "url=https://fmartingr.com"
+
+    Returns:
+        dns_resolution: x
+        tcp_established: x
+        ssl_handshake_done: x
+        ttfb: x
+
+        total: x
+    """
+    params = request.json
+    url = params.get("url", None)
+    if not url:
+        return Response(status=400)
+
+    cmd = (
+        "curl", '-w', 'dns_resolution: %{time_namelookup}s\ntcp_established: %{time_connect}s\nssl_handshake_done: %{time_appconnect}s\nttfb: %{time_starttransfer}s\n\ntotal: %{time_total}s',
+        '-o', '/dev/null',
+        '-s',
+        '-k',
+        url
+    )
+
+    result = subprocess.run(
+        cmd, stdout=subprocess.PIPE
+    )
+    print(result.stdout)
+    return Response(result.stdout)
 
 
 @app.route("/samesite")
