@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import subprocess
+import time
 
 import requests
 from flask import Flask, request, Response, render_template, jsonify
@@ -159,6 +160,19 @@ def request_view():
         render_template("request.j2", request_data=request_data),
         content_type="text/plain",
     )
+
+
+@app.route("/timeout", methods=["GET"])
+def timeout_view():
+    """
+    Forces a slow response from the request
+
+    Usage:
+        /timeout?duration=301 (in seconds)
+    """
+    duration = int(request.args.get("duration", 300))
+    time.sleep(duration)
+    return jsonify({"duration": duration})
 
 
 @app.route("/curl", methods=["POST"])
