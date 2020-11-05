@@ -238,7 +238,7 @@ def samesite_iframe_view():
     return f"iframe on {hostname}"
 
 
-@app.route("/json_items")
+@app.route("/json_items", methods=["GET", "POST"])
 def items_view():
     """
     Returns a JSON list with the items specified by the `items_number` parameter.
