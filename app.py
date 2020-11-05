@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 import os
@@ -236,6 +237,18 @@ def samesite_iframe_view():
     hostname = os.environ.get("HOSTNAME")
     return f"iframe on {hostname}"
 
+
+@app.route("/json_items")
+def items_view():
+    """
+    Returns a JSON list with the items specified by the `items_number` parameter.
+    """
+
+    items_number = request.args.get("items_number", 1)
+    item = {"this": "is", "a": "json", "big": "body"}
+    response_body = [copy.copy(item) for i in range(0, int(items_number))]
+
+    return jsonify(response_body)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080, host="0.0.0.0")
