@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test</title>
+</head>
+
+<body>
+    <p>Page to check CORS between hostnames. Enter the hostname to make a XHR request to in the field and the check to
+        get the CORS headers returned or not and press the XHR button.</p>
+    <div><input id="hostname" placeholder="Hostname to make a request to" /></div>
+    <div>
+        <label for="enable_cors">Enable CORS in XHR</label>
+        <input type="checkbox" id="enableCors" checked="checked" />
+    </div>
+    <div><input type="button" id="submit" value="Send XHR" /></div>
+    <pre id="response"></pre>
+    <script type="text/javascript">
+    function submitXHR() {
+        var hostname = document.querySelector("#hostname").value || location.host;
+        var enableCORS = document.querySelector("#enableCors").checked;
+
+        // console.log(hostname, enableCORS)
+        function loadHandler () {
+            document.querySelector("#response").innerHTML = this.responseText;
+        }
+
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", loadHandler);
+        oReq.open("POST", location.protocol + "//" + hostname + "/cors?enabled=" + enableCORS);
+        oReq.send();
+    }
+    document.querySelector("#submit").addEventListener("click", submitXHR);
+    </script>
+</body>
+
+</html>

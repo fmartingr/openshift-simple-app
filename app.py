@@ -238,6 +238,24 @@ def samesite_iframe_view():
     return f"iframe on {hostname}"
 
 
+@app.route("/cors", methods=["GET", "POST"])
+def cors_view():
+    """
+    View to check CORS within the cluster
+    """
+
+    if request.method == "POST":
+        headers = {}
+        enable_cors = request.args.get("enabled", "false")
+        if enable_cors == "true":
+            headers = {
+                "Access-Control-Allow-Origin": "*"
+            }
+        return Response(json.dumps({"status": "ok", "cors_enabled": enable_cors}), headers=headers)
+
+    return render_template("cors.j2")
+
+
 @app.route("/json_items", methods=["GET", "POST"])
 def items_view():
     """
