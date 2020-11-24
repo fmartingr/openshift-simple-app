@@ -8,14 +8,25 @@ import time
 
 import requests
 from flask import Flask, request, Response, render_template, jsonify
+from flask_httpauth import HTTPBasicAuth
 from werkzeug.routing import Rule
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.url_map.add(Rule("/request", endpoint="request"))
-
-
 logging.basicConfig(format="%(message)s", level="INFO")
 black_logger = logging.getLogger("blank")
+auth = HTTPBasicAuth()
+
+users = {
+    "foo": generate_password_hash("bar"),
+}
+
+@auth.verify_password
+def verify_password(username, password):
+    if username in users and \
+            check_password_hash(users.get(username), password):
+        return username
 
 
 @app.route("/")
@@ -267,6 +278,21 @@ def items_view():
     response_body = [copy.copy(item) for i in range(0, int(items_number))]
 
     return jsonify(response_body)
+
+
+@app.route("/httpauth")
+@auth.login_required
+def http_auth_route():
+    """
+    Route with HTTP Auth enabled
+    """
+    return jsonify({"logged_in": True, "logout": "/httpauth/logout"})
+
+
+@app.route("/httpauth/logout")
+def http_auth_logout_view():
+    return "Logged out", 401
+    
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080, host="0.0.0.0")
