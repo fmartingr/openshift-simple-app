@@ -22,10 +22,10 @@ users = {
     "foo": generate_password_hash("bar"),
 }
 
+
 @auth.verify_password
 def verify_password(username, password):
-    if username in users and \
-            check_password_hash(users.get(username), password):
+    if username in users and check_password_hash(users.get(username), password):
         return username
 
 
@@ -210,16 +210,17 @@ def curl_view():
         return Response(status=400)
 
     cmd = (
-        "curl", '-w', 'dns_resolution: %{time_namelookup}s\ntcp_established: %{time_connect}s\nssl_handshake_done: %{time_appconnect}s\nttfb: %{time_starttransfer}s\n\ntotal: %{time_total}s',
-        '-o', '/dev/null',
-        '-s',
-        '-k',
-        url
+        "curl",
+        "-w",
+        "dns_resolution: %{time_namelookup}s\ntcp_established: %{time_connect}s\nssl_handshake_done: %{time_appconnect}s\nttfb: %{time_starttransfer}s\n\ntotal: %{time_total}s",
+        "-o",
+        "/dev/null",
+        "-s",
+        "-k",
+        url,
     )
 
-    result = subprocess.run(
-        cmd, stdout=subprocess.PIPE
-    )
+    result = subprocess.run(cmd, stdout=subprocess.PIPE)
     print(result.stdout)
     return Response(result.stdout)
 
@@ -259,10 +260,10 @@ def cors_view():
         headers = {}
         enable_cors = request.args.get("enabled", "false")
         if enable_cors == "true":
-            headers = {
-                "Access-Control-Allow-Origin": "*"
-            }
-        return Response(json.dumps({"status": "ok", "cors_enabled": enable_cors}), headers=headers)
+            headers = {"Access-Control-Allow-Origin": "*"}
+        return Response(
+            json.dumps({"status": "ok", "cors_enabled": enable_cors}), headers=headers
+        )
 
     return render_template("cors.j2")
 
@@ -292,7 +293,23 @@ def http_auth_route():
 @app.route("/httpauth/logout")
 def http_auth_logout_view():
     return "Logged out", 401
-    
+
+
+@app.route(
+    "/test_redirect", methods=["GET", "POST", "DELETE", "HEAD", "UPDATE", "PATH"]
+)
+def test_redirect_view():
+    """
+    Returns a custom response code and Location as set in the headers: X-Response-Code and X-Location
+    """
+    response_code = int(request.headers.get("X-Response-Code", 302))
+    response_location = request.headers.get("X-Location", "/request")
+
+    return Response(
+        status=response_code,
+        headers={"Location": response_location}
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080, host="0.0.0.0")
