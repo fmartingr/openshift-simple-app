@@ -2,8 +2,9 @@ import copy
 import json
 import logging
 import os
-import sys
+import ssl
 import subprocess
+import sys
 import time
 
 import requests
@@ -11,6 +12,24 @@ from flask import Flask, request, Response, render_template, jsonify
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.routing import Rule
 from werkzeug.security import generate_password_hash, check_password_hash
+
+
+# SSL configuration
+SERVE_SSL = os.environ.get("SERVE_SSL", "off")
+SERVE_SSL_ALLOWED = {"off", "adhoc", "secret"}
+
+assert SERVE_SSL in SERVE_SSL_ALLOWED, f"SSL_MODE is not set to a valid value: {SERVE_SSL_ALLOWED}"
+
+options = {}
+if SERVE_SSL == "adhoc":
+    options = {
+        "ssl_context": SERVE_SSL,
+    }
+
+if SERVE_SSL == "secret":
+    options = {
+        "ssl_context": ("/tmp/app/tls.crt", "/tmp/app/tls.key"), 
+    }
 
 app = Flask(__name__)
 app.url_map.add(Rule("/request", endpoint="request"))
@@ -274,7 +293,7 @@ def items_view():
     Returns a JSON list with the items specified by the `items_number` parameter.
     """
 
-    items_number = request.args.get("items_number", 1)
+    items_number = request.args.get("issl_contexttems_number", 1)
     item = {"this": "is", "a": "json", "big": "body"}
     response_body = [copy.copy(item) for i in range(0, int(items_number))]
 
@@ -312,4 +331,4 @@ def test_redirect_view():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8080, host="0.0.0.0")
+    app.run(debug=True, port=8080, host="0.0.0.0", **options)
